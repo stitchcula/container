@@ -403,19 +403,26 @@ func (c *containerImpl) buildKeyLookupFunc(lookupKey interface{}) func(matchKey 
 		keyReflectType = reflect.TypeOf(lookupKey)
 	}
 
-	keyLookupMap := make(map[interface{}]bool)
-	keyLookupMap[lookupKey] = true
-	keyLookupMap[keyReflectType] = true
-
 	if keyReflectType.Kind() == reflect.Ptr {
 		typeUnderPointer := keyReflectType.Elem()
 		if typeUnderPointer.Kind() == reflect.Interface {
-			keyLookupMap[typeUnderPointer] = true
+			keyReflectType = typeUnderPointer
 		}
 	}
+
 	return func(key interface{}) bool {
-		_, ok := keyLookupMap[key]
-		return ok
+		switch key {
+		case lookupKey:
+			return true
+		case keyReflectType:
+			return true
+		}
+		if kt, ok := key.(reflect.Type); ok {
+			if keyReflectType.Kind() == reflect.Interface && kt.Implements(keyReflectType) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
