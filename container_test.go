@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mylxsw/container"
+	"github.com/stitchcula/container"
 )
 
 type GetUserInterface interface {
@@ -128,26 +128,26 @@ func TestInterfaceInjection(t *testing.T) {
 		return &UserService{repo: userRepo}, nil
 	})
 
-	// if err := c.Resolve(func(userService GetUserInterface) {
-	// 	if userService.GetUser() != expectedValue {
-	// 		t.Error("test failed")
-	// 	}
-	// }); err != nil {
-	// 	t.Errorf("test failed: %s", err)
-	// }
+	if err := c.Resolve(func(userService GetUserInterface) {
+		if userService.GetUser() != expectedValue {
+			t.Error("test failed")
+		}
+	}); err != nil {
+		t.Errorf("test failed: %s", err)
+	}
 
 	c.MustPrototype(func() (RoleService, error) {
 		return RoleService{}, nil
 	})
 
-	// err := c.Resolve(func(roleService GetRoleInterface) {
-	// 	if roleService.GetRole() != "admin" {
-	// 		t.Error("test failed")
-	// 	}
-	// })
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	err := c.Resolve(func(roleService GetRoleInterface) {
+		if roleService.GetRole() != "admin" {
+			t.Error("test failed")
+		}
+	})
+	if err != nil {
+		t.Error(err)
+	}
 
 	for _, k := range c.Keys() {
 		fmt.Println(k)
